@@ -7,6 +7,7 @@ import org.lpro.leBonSandwich.exception.MethodNotAllowed;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
+import org.lpro.leBonSandwich.entity.Item;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +24,9 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 //Annotation pour controller rest
 @RestController
+@RequestMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
 @ExposesResourceFor(Commande.class)
+
 public class CommandeRepresentation {
 
     private final CommandeResource cmdr;
@@ -32,14 +35,14 @@ public class CommandeRepresentation {
         this.cmdr = cmdr;
     }
 
-    @GetMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping
     public ResponseEntity<?> getAllCommandes(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "limit", required = false, defaultValue = "10") Integer limit) {
-        return new ResponseEntity<>(cmdr.findAll(PageRequest.of(page, limit)), HttpStatus.OK);
+        return new ResponseEntity<>(commande2Ressource(cmdr.findAll(PageRequest.of(page, limit))), HttpStatus.OK);
     }
 
-    @PostMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public ResponseEntity<?> postCommande(@RequestBody Commande commande) {
         commande.setId(UUID.randomUUID().toString());
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -52,12 +55,12 @@ public class CommandeRepresentation {
         return new ResponseEntity<>(saved, responseHeaders, HttpStatus.CREATED);
     }
 
-    @GetMapping(value = "/commandes/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCommandeAvecId(@PathVariable("commandeId") String id) {
         return new ResponseEntity<>(commande2Ressource(cmdr.findById(id)), HttpStatus.OK);
     }
 
-    @PutMapping(value = "/commandes/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> putCommande(@PathVariable("commandeId") String id, @RequestBody Commande commandeUpdated)
             throws NotFound {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -73,7 +76,7 @@ public class CommandeRepresentation {
         }).orElseThrow(() -> new NotFound("Commande inexistante !"));
     }
 
-    @DeleteMapping(value = "/commandes/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteCommande(@PathVariable("commandeId") String id) throws NotFound {
         return cmdr.findById(id).map(commande -> {
             cmdr.delete(commande);
@@ -81,17 +84,17 @@ public class CommandeRepresentation {
         }).orElseThrow(() -> new NotFound("Commande inexistante !"));
     }
 
-    @PostMapping(value = "/commandes/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> postMethode405Cmd(@PathVariable("commandeId") int id) throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP POST n'est pas prévue pour cette route !");
     }
 
-    @PutMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PutMapping
     public ResponseEntity<?> putMethode405Cmd() throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP PUT n'est pas prévue pour cette route !");
     }
 
-    @DeleteMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping
     public ResponseEntity<?> deleteMethode405Cmd() throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP DELETE n'est pas prévue pour cette route !");
     }

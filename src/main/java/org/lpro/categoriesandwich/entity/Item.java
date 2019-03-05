@@ -14,10 +14,10 @@ public class Item {
     private Float tarif;
     private Integer quantite;
 
-    // @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    // @JoinColumn(name = "commande_id", nullable = false)
-    // @JsonIgnore
-    // private String command_id ;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "commande_id", nullable = false)
+    @JsonIgnore
+    private Commande commande ;
 
     Item() {
 

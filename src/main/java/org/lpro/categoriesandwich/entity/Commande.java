@@ -3,6 +3,7 @@ package org.lpro.leBonSandwich.entity;
 import javax.persistence.*;
 import java.util.Set;
 
+
 @Entity
 public class Commande {
 
@@ -22,14 +23,19 @@ public class Commande {
     private String date_paiement;
     private String mode_paiement;
 
-    // @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, fetch =
-    // FetchType.LAZY)
-    // private Set<Item> items;
+    @OneToMany(mappedBy = "commande", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<Item> items;
 
     Commande() {
         // necessaire pour JPA !
     }
 
+public Set<Item> getItems() {
+        return items;
+    }
+    public void setItems(Set<Item> items) {
+        this.items=items;
+    }
     public String getRemise() {
         return remise;
     }
