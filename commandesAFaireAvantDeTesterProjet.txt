@@ -1,0 +1,11 @@
+Créer containers :
+    docker-compose build
+    docker-compose up -d
+    docker run -it --rm --net=compose_isolated_nw2 postgres psql -h postgres -U postgres
+Saisir mdp : riovas
+Créer bdd :
+    docker cp ./command_schema.sql postgres:/docker-entrypoint-initdb.d/dump.sql
+    docker exec -u postgres postgres psql postgres postgres -f docker-entrypoint-initdb.d/dump.sql
+Remplir bdd :
+    docker cp ./command_data.sql postgres:/docker-entrypoint-initdb.d/dump.sql
+    docker exec -u postgres postgres psql postgres postgres -f docker-entrypoint-initdb.d/dump.sql
