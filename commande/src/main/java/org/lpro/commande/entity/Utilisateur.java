@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
 @Entity
-public class User {
+public class Utilisateur {
 
     @Id
     private String id;
@@ -13,7 +13,7 @@ public class User {
     private String mdp;
 
 
-    User() {
+    Utilisateur() {
 
     }
     public String getId() {
