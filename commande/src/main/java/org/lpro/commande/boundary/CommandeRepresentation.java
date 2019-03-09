@@ -1,5 +1,6 @@
 package org.lpro.commande.boundary;
 
+import io.jsonwebtoken.*;
 import org.lpro.commande.entity.Commande;
 import org.lpro.commande.exception.BadRequest;
 import org.lpro.commande.exception.NotFound;
@@ -28,18 +29,20 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 @ExposesResourceFor(Commande.class)
 
 public class CommandeRepresentation {
+    
+    private final ItemResource ir;
+    private final CommandeResource cr;
 
-    private final CommandeResource cmdr;
-
-    public CommandeRepresentation(CommandeResource cmdr) {
-        this.cmdr = cmdr;
+    public CommandeRepresentation(ItemResource ir,CommandeResource cr) {
+        this.cr = cr;
+        this.ir = ir;
     }
 
     @GetMapping
     public ResponseEntity<?> getAllCommandes(
             @RequestParam(value = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
-        return new ResponseEntity<>(commande2Ressource(cmdr.findAll(PageRequest.of(page, size))), HttpStatus.OK);
+        return new ResponseEntity<>(commande2Ressource(cr.findAll(PageRequest.of(page, size))), HttpStatus.OK);
     }
 
     @PostMapping
@@ -49,15 +52,22 @@ public class CommandeRepresentation {
         Date date = new Date();
         commande.setCreated_at(dateFormat.format(date));
         commande.setUpdated_at(dateFormat.format(date));
-        Commande saved = cmdr.save(commande);
+        String token =Jwts.builder().setSubject(commande.getId()).signWith(SignatureAlgorithm.HS256,"secret").compact();
+        commande.setToken(token);
+        Commande saved = cr.save(commande);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(linkTo(CommandeRepresentation.class).slash(saved.getId()).toUri());
         return new ResponseEntity<>(saved, responseHeaders, HttpStatus.CREATED);
     }
 
     @GetMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getCommandeAvecId(@PathVariable("commandeId") String id) {
-        return new ResponseEntity<>(commande2Ressource(cmdr.findById(id)), HttpStatus.OK);
+    public ResponseEntity<?> getCommandeAvecId(@PathVariable("commandeId") String id,
+    @RequestParam(value = "token", required = false, defaultValue = "") String token,
+    @RequestHeader(value="x-lbs-token"  ,required = false, defaultValue = "") String tokenHeader) {
+        Optional<Commande> commande=cr.findById(id);
+            if(commande.get().getToken().equals(token) || commande.get().getToken().equals(tokenHeader))
+             return new ResponseEntity<>(commande2Ressource(commande), HttpStatus.OK);
+            else return new ResponseEntity<>("{\"erreur\":\"Token invalide\"}", HttpStatus.FORBIDDEN);
     }
 
     @PutMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,21 +75,21 @@ public class CommandeRepresentation {
             throws NotFound {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
-        return cmdr.findById(id).map(commande -> {
+        return cr.findById(id).map(commande -> {
             commande.setNom(commandeUpdated.getNom());
             commande.setLivraison(commandeUpdated.getLivraison());
             commande.setMail(commandeUpdated.getMail());
             commande.setStatus(commandeUpdated.getStatus());
             commande.setUpdated_at(dateFormat.format(date));
-            cmdr.save(commande);
+            cr.save(commande);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }).orElseThrow(() -> new NotFound("Commande inexistante !"));
     }
 
     @DeleteMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> deleteCommande(@PathVariable("commandeId") String id) throws NotFound {
-        return cmdr.findById(id).map(commande -> {
-            cmdr.delete(commande);
+        return cr.findById(id).map(commande -> {
+            cr.delete(commande);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }).orElseThrow(() -> new NotFound("Commande inexistante !"));
     }
@@ -124,5 +134,56 @@ public class CommandeRepresentation {
             return new Resource<>(commande, selfLink);
         }
     }
+
+
+    @GetMapping(value = "/{commandeId}/items")
+    public ResponseEntity<?> getAllitemsByCommandeId(@PathVariable("commandeId") String id) throws NotFound {
+        if (!cr.existsById(id)) {
+            throw new NotFound("Commande inexistante !");
+        }
+        return new ResponseEntity<>(ir.findByCommandeId(id), HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/{commandeId}/items")
+    public ResponseEntity<?> postitem(@PathVariable("commandeId") String id, @RequestBody Item item)
+            throws NotFound {
+        return cr.findById(id).map(commande -> {
+            item.setId(UUID.randomUUID().toString());
+            item.setCommande(commande);
+            Item saved=ir.save(item);
+            HttpHeaders responseHeaders = new HttpHeaders();
+            responseHeaders.setLocation(linkTo(ItemRepresentation.class).slash(saved.getId()).toUri());
+            return new ResponseEntity<>(saved, responseHeaders, HttpStatus.CREATED);
+        }).orElseThrow(() -> new NotFound("Commande inexistante !"));
+    }
+
+    @PutMapping(value = "/{commandeId}/items/{itemId}")
+    public ResponseEntity<?> putitem(@PathVariable("commandeId") String idCommande,
+            @PathVariable("itemId") String idItem, @RequestBody Item itemUpdated) throws NotFound {
+        if (!cr.existsById(idCommande)) {
+            throw new NotFound("Commande inexistante !");
+        }
+        return ir.findById(idItem).map(item -> {
+            item.setQuantite(itemUpdated.getQuantite());
+            item.setUri(itemUpdated.getUri());
+            item.setLibelle(itemUpdated.getLibelle());
+            item.setTarif(itemUpdated.getTarif());
+            ir.save(item);
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
+        }).orElseThrow(() -> new NotFound("item inexistant !"));
+    }
+
+    @DeleteMapping(value = "/{commandeId}/items/{itemId}")
+    public ResponseEntity<?> deleteitem(@PathVariable("commandeId") String idCommande,
+            @PathVariable("itemId") String idItem, @RequestBody Item itemUpdated) throws NotFound {
+        if (!cr.existsById(idCommande)) {
+            throw new NotFound("Commande inexistante !");
+        }
+        return ir.findById(idItem).map(item -> {
+            ir.delete(item);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }).orElseThrow(() -> new NotFound("item inexistant !"));
+    }
+
 
 }

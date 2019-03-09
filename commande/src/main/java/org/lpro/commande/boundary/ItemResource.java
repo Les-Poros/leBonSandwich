@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ItemResource extends CrudRepository<Item, String> {
     List<Item> findAll(Pageable pegeable);
+    List<Item> findByCommandeId(String id);
 }

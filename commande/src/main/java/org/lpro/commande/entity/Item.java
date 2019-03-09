@@ -23,6 +23,13 @@ public class Item {
 
     }
 
+    public Commande getCommande() {
+        return commande;
+    }
+
+    public void setCommande(Commande commande) {
+        this.commande = commande;
+    }
     public String getId() {
         return id;
     }

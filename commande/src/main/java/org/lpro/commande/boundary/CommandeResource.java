@@ -9,4 +9,5 @@ import java.util.*;
 public interface CommandeResource extends CrudRepository<Commande, String> {
     Page<Commande> findAll(Pageable pegeable);
     List<Commande> findAll();
+    Optional<Commande> findById(String id);
 }
