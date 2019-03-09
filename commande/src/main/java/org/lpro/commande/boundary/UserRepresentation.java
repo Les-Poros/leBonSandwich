@@ -22,19 +22,17 @@ import org.springframework.web.bind.annotation.*;
 
 //Annotation pour controller rest
 @RestController
-@RequestMapping(value = "/items", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @ExposesResourceFor(Item.class)
-public class ItemRepresentation {
+public class UserRepresentation {
 
-    private final ItemResource ir;
-    private final CommandeResource cr;
+    private final UserResource ur;
 
-    public ItemRepresentation(ItemResource ir, CommandeResource cr) {
-        this.ir = ir;
-        this.cr = cr;
+    public UserRepresentation( UserResource ur) {
+        this.ur = ur;
     }
 
-    @GetMapping(value = "/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{itemId}/auth", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getItemAvecId(@PathVariable("itemId") String id) {
         return new ResponseEntity<>(ir.findById(id), HttpStatus.OK);
     }

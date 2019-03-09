@@ -1,7 +1,7 @@
 package org.lpro.commande.boundary;
 
 import io.jsonwebtoken.*;
-import org.lpro.commande.entity.Commande;
+import org.lpro.commande.entity.*;
 import org.lpro.commande.exception.BadRequest;
 import org.lpro.commande.exception.NotFound;
 import org.lpro.commande.exception.MethodNotAllowed;
@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -47,13 +48,27 @@ public class CommandeRepresentation {
 
     @PostMapping
     public ResponseEntity<?> postCommande(@RequestBody Commande commande) {
-        commande.setId(UUID.randomUUID().toString());
+        String commandId=UUID.randomUUID().toString();
+        commande.setId(commandId);
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         commande.setCreated_at(dateFormat.format(date));
         commande.setUpdated_at(dateFormat.format(date));
         String token =Jwts.builder().setSubject(commande.getId()).signWith(SignatureAlgorithm.HS256,"secret").compact();
         commande.setToken(token);
+        commande.getItems().forEach(item -> {
+            RestTemplate template = new RestTemplate();
+            Sandwich sandwich = template.getForObject("http://192.168.99.100:8083"+item.getUri(), Sandwich.class);
+            item.setTarif(sandwich.getPrix());
+            item.setLibelle(sandwich.getNom());
+            item.setId(UUID.randomUUID().toString());
+            ir.save(item);
+        });
+        cr.save(commande);
+        commande.getItems().forEach(item -> {
+            item.setCommande(commande);
+            ir.save(item);
+        });
         Commande saved = cr.save(commande);
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.setLocation(linkTo(CommandeRepresentation.class).slash(saved.getId()).toUri());

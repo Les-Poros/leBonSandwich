@@ -5,6 +5,7 @@ import java.util.List;
 import org.lpro.categoriesandwich.entity.Sandwich;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.domain.*;
 
 public interface SandwichResource extends CrudRepository<Sandwich, String> {
 
@@ -16,6 +17,6 @@ public interface SandwichResource extends CrudRepository<Sandwich, String> {
 
     List<Sandwich> findByPrixAndPain(Integer prix, String pain);
 
-    List<Sandwich> findAll(Pageable pegeable);
+    Page<Sandwich> findAll(Pageable pegeable);
 
 }

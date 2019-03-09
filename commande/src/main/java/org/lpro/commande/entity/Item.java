@@ -11,11 +11,10 @@ public class Item {
     private String id;
     private String uri;
     private String libelle;
-    private Float tarif;
+    private Integer tarif;
     private Integer quantite;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "commande_id", nullable = false)
+    @ManyToOne
     @JsonIgnore
     private Commande commande ;
 
@@ -54,11 +53,11 @@ public class Item {
         this.libelle = libelle;
     }
 
-    public Float getTarif() {
+    public Integer getTarif() {
         return tarif;
     }
 
-    public void setTarif(Float tarif) {
+    public void setTarif(Integer tarif) {
         this.tarif = tarif;
     }
 
