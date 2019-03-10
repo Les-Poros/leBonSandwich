@@ -53,4 +53,5 @@ public class Categorie {
     public void setSandwichs(Set<Sandwich> sandwichs) {
         this.sandwichs = sandwichs;
     }
+
 }

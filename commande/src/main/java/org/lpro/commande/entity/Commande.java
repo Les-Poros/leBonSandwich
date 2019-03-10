@@ -3,7 +3,6 @@ package org.lpro.commande.entity;
 import javax.persistence.*;
 import java.util.Set;
 
-
 @Entity
 public class Commande {
 
@@ -30,14 +29,16 @@ public class Commande {
         // necessaire pour JPA !
     }
 
-public Set<Item> getItems() {
-        return items;
+    public Set<Item> getItems() {
+        return this.items;
     }
+
     public void setItems(Set<Item> items) {
-        this.items=items;
+        this.items = items;
     }
+
     public String getRemise() {
-        return remise;
+        return this.remise;
     }
 
     public void setRemise(String remise) {
@@ -45,7 +46,7 @@ public Set<Item> getItems() {
     }
 
     public String getToken() {
-        return token;
+        return this.token;
     }
 
     public void setToken(String token) {
@@ -53,7 +54,7 @@ public Set<Item> getItems() {
     }
 
     public String getClient_id() {
-        return client_id;
+        return this.client_id;
     }
 
     public void setClient_id(String client_id) {
@@ -61,7 +62,7 @@ public Set<Item> getItems() {
     }
 
     public String getRef_paiement() {
-        return ref_paiement;
+        return this.ref_paiement;
     }
 
     public void setRef_paiement(String ref_paiement) {
@@ -69,7 +70,7 @@ public Set<Item> getItems() {
     }
 
     public String getDate_paiement() {
-        return date_paiement;
+        return this.date_paiement;
     }
 
     public void setDate_paiement(String date_paiement) {
@@ -77,7 +78,7 @@ public Set<Item> getItems() {
     }
 
     public String getMode_paiement() {
-        return mode_paiement;
+        return this.mode_paiement;
     }
 
     public void setMode_paiement(String mode_paiement) {
@@ -85,7 +86,7 @@ public Set<Item> getItems() {
     }
 
     public String getStatus() {
-        return status;
+        return this.status;
     }
 
     public void setStatus(String status) {
@@ -93,7 +94,7 @@ public Set<Item> getItems() {
     }
 
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -101,7 +102,7 @@ public Set<Item> getItems() {
     }
 
     public String getNom() {
-        return nom;
+        return this.nom;
     }
 
     public void setNom(String nom) {
@@ -109,7 +110,7 @@ public Set<Item> getItems() {
     }
 
     public String getMail() {
-        return mail;
+        return this.mail;
     }
 
     public void setMail(String mail) {
@@ -117,7 +118,7 @@ public Set<Item> getItems() {
     }
 
     public String getCreated_at() {
-        return created_at;
+        return this.created_at;
     }
 
     public void setCreated_at(String created_at) {
@@ -125,7 +126,7 @@ public Set<Item> getItems() {
     }
 
     public String getLivraison() {
-        return livraison;
+        return this.livraison;
     }
 
     public void setLivraison(String livraison) {
@@ -133,7 +134,7 @@ public Set<Item> getItems() {
     }
 
     public String getUpdated_at() {
-        return updated_at;
+        return this.updated_at;
     }
 
     public void setUpdated_at(String updated_at) {
@@ -141,10 +142,11 @@ public Set<Item> getItems() {
     }
 
     public Integer getMontant() {
-        return montant;
+        return this.montant;
     }
 
     public void setMontant(Integer montant) {
         this.montant = montant;
     }
+
 }

@@ -2,7 +2,6 @@ package org.lpro.commande.boundary;
 
 import io.jsonwebtoken.*;
 import org.lpro.commande.entity.*;
-import org.lpro.commande.exception.BadRequest;
 import org.lpro.commande.exception.NotFound;
 import org.lpro.commande.exception.MethodNotAllowed;
 import org.springframework.data.domain.PageRequest;
@@ -17,24 +16,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 //Annotation pour controller rest
 @RestController
 @RequestMapping(value = "/commandes", produces = MediaType.APPLICATION_JSON_VALUE)
 @ExposesResourceFor(Commande.class)
-
 public class CommandeRepresentation {
-    
+
     private final ItemResource ir;
     private final CommandeResource cr;
 
-    public CommandeRepresentation(ItemResource ir,CommandeResource cr) {
+    public CommandeRepresentation(ItemResource ir, CommandeResource cr) {
         this.cr = cr;
         this.ir = ir;
     }
@@ -48,17 +44,18 @@ public class CommandeRepresentation {
 
     @PostMapping
     public ResponseEntity<?> postCommande(@RequestBody Commande commande) {
-        String commandId=UUID.randomUUID().toString();
+        String commandId = UUID.randomUUID().toString();
         commande.setId(commandId);
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
         commande.setCreated_at(dateFormat.format(date));
         commande.setUpdated_at(dateFormat.format(date));
-        String token =Jwts.builder().setSubject(commande.getId()).signWith(SignatureAlgorithm.HS256,"secret").compact();
+        String token = Jwts.builder().setSubject(commande.getId()).signWith(SignatureAlgorithm.HS256, "secret")
+                .compact();
         commande.setToken(token);
         commande.getItems().forEach(item -> {
             RestTemplate template = new RestTemplate();
-            Sandwich sandwich = template.getForObject("http://192.168.99.100:8083"+item.getUri(), Sandwich.class);
+            Sandwich sandwich = template.getForObject("http://192.168.99.100:8083" + item.getUri(), Sandwich.class);
             item.setTarif(sandwich.getPrix());
             item.setLibelle(sandwich.getNom());
             item.setId(UUID.randomUUID().toString());
@@ -77,12 +74,13 @@ public class CommandeRepresentation {
 
     @GetMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCommandeAvecId(@PathVariable("commandeId") String id,
-    @RequestParam(value = "token", required = false, defaultValue = "") String token,
-    @RequestHeader(value="x-lbs-token"  ,required = false, defaultValue = "") String tokenHeader) {
-        Optional<Commande> commande=cr.findById(id);
-            if(commande.get().getToken().equals(token) || commande.get().getToken().equals(tokenHeader))
-             return new ResponseEntity<>(commande2Ressource(commande), HttpStatus.OK);
-            else return new ResponseEntity<>("{\"erreur\":\"Token invalide\"}", HttpStatus.FORBIDDEN);
+            @RequestParam(value = "token", required = false, defaultValue = "") String token,
+            @RequestHeader(value = "x-lbs-token", required = false, defaultValue = "") String tokenHeader) {
+        Optional<Commande> commande = cr.findById(id);
+        if (commande.get().getToken().equals(token) || commande.get().getToken().equals(tokenHeader))
+            return new ResponseEntity<>(commande2Ressource(commande), HttpStatus.OK);
+        else
+            return new ResponseEntity<>("{\"erreur\":\"Token invalide\"}", HttpStatus.FORBIDDEN);
     }
 
     @PutMapping(value = "/{commandeId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -150,7 +148,6 @@ public class CommandeRepresentation {
         }
     }
 
-
     @GetMapping(value = "/{commandeId}/items")
     public ResponseEntity<?> getAllitemsByCommandeId(@PathVariable("commandeId") String id) throws NotFound {
         if (!cr.existsById(id)) {
@@ -160,12 +157,11 @@ public class CommandeRepresentation {
     }
 
     @PostMapping(value = "/{commandeId}/items")
-    public ResponseEntity<?> postitem(@PathVariable("commandeId") String id, @RequestBody Item item)
-            throws NotFound {
+    public ResponseEntity<?> postitem(@PathVariable("commandeId") String id, @RequestBody Item item) throws NotFound {
         return cr.findById(id).map(commande -> {
             item.setId(UUID.randomUUID().toString());
             item.setCommande(commande);
-            Item saved=ir.save(item);
+            Item saved = ir.save(item);
             HttpHeaders responseHeaders = new HttpHeaders();
             responseHeaders.setLocation(linkTo(ItemRepresentation.class).slash(saved.getId()).toUri());
             return new ResponseEntity<>(saved, responseHeaders, HttpStatus.CREATED);
@@ -184,7 +180,7 @@ public class CommandeRepresentation {
             item.setLibelle(itemUpdated.getLibelle());
             item.setTarif(itemUpdated.getTarif());
             ir.save(item);
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }).orElseThrow(() -> new NotFound("item inexistant !"));
     }
 
@@ -200,5 +196,24 @@ public class CommandeRepresentation {
         }).orElseThrow(() -> new NotFound("item inexistant !"));
     }
 
+    @PutMapping(value = "/{commandeId}/items", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> putMethode405CmdWithIdAndItems() throws MethodNotAllowed {
+        throw new MethodNotAllowed("La méthode HTTP PUT n'est pas prévue pour cette route !");
+    }
+
+    @DeleteMapping(value = "/{commandeId}/items", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteMethode405CmdWithIdAndItems() throws MethodNotAllowed {
+        throw new MethodNotAllowed("La méthode HTTP DELETE n'est pas prévue pour cette route !");
+    }
+
+    @GetMapping(value = "/{commandeId}/items/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getMethode405CmdAndItemWithIds() throws MethodNotAllowed {
+        throw new MethodNotAllowed("La méthode HTTP GET n'est pas prévue pour cette route !");
+    }
+
+    @PostMapping(value = "/{commandeId}/items/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> postMethode405CmdAndItemWithIds() throws MethodNotAllowed {
+        throw new MethodNotAllowed("La méthode HTTP POST n'est pas prévue pour cette route !");
+    }
 
 }

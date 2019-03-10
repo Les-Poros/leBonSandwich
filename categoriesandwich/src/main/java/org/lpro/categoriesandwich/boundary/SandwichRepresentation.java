@@ -1,10 +1,8 @@
 package org.lpro.categoriesandwich.boundary;
 
 import java.util.*;
-
 import org.lpro.categoriesandwich.entity.Sandwich;
 import org.lpro.categoriesandwich.entity.Categorie;
-import org.lpro.categoriesandwich.exception.BadRequest;
 import org.lpro.categoriesandwich.exception.NotFound;
 import org.lpro.categoriesandwich.exception.MethodNotAllowed;
 import org.springframework.http.HttpStatus;
@@ -13,11 +11,9 @@ import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
-
 import org.springframework.web.bind.annotation.*;
 
 //Annotation pour controller rest
@@ -57,14 +53,13 @@ public class SandwichRepresentation {
         if (!cr.existsById(id)) {
             throw new NotFound("Catégorie inexistante !");
         }
-      
         return new ResponseEntity<>(sandwich2Resource(sr.findByCategorieId(id)), HttpStatus.OK);
     }
 
     @GetMapping(value = "/{sandwichId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCategorieAvecId(@PathVariable("sandwichId") String id) throws NotFound {
         return Optional.ofNullable(sr.findById(id)).filter(Optional::isPresent)
-                .map(sandwich -> new ResponseEntity<>(sandwichToResource(sandwich.get(),false), HttpStatus.OK))
+                .map(sandwich -> new ResponseEntity<>(sandwichToResource(sandwich.get(), false), HttpStatus.OK))
                 .orElseThrow(() -> new NotFound("Catégorie inexistante !"));
     }
 
@@ -91,7 +86,7 @@ public class SandwichRepresentation {
             sandwich.setPain(sandwichUpdated.getPain());
             sandwich.setPrix(sandwichUpdated.getPrix());
             sr.save(sandwich);
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }).orElseThrow(() -> new NotFound("Sandwich inexistant !"));
     }
 
@@ -122,23 +117,18 @@ public class SandwichRepresentation {
         throw new MethodNotAllowed("La méthode HTTP DELETE n'est pas prévue pour cette route !");
     }
 
-    @PutMapping(value = "/{categorieId}/sandwichs", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putMethode405WithCategSand() throws MethodNotAllowed {
+    @PostMapping(value = "/{sandwichId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> postMethode405SandWithId() throws MethodNotAllowed {
+        throw new MethodNotAllowed("La méthode HTTP POST n'est pas prévue pour cette route !");
+    }
+
+    @PutMapping(value = "/categories/{categorieId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> putMethode405SandWithCatId() throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP PUT n'est pas prévue pour cette route !");
     }
 
-    @DeleteMapping(value = "/{categorieId}/sandwichs", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteMethode405WithCategSand() throws MethodNotAllowed {
-        throw new MethodNotAllowed("La méthode HTTP DELETE n'est pas prévue pour cette route !");
-    }
-
-    @GetMapping(value = "/{categorieId}/sandwichs/{sandwichId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getMethode405WithCategAndSand() throws MethodNotAllowed {
-        throw new MethodNotAllowed("La méthode HTTP PUT n'est pas prévue pour cette route !");
-    }
-
-    @PostMapping(value = "/{categorieId}/sandwichs/{sandwichId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> postMethode405WithCategAndSand() throws MethodNotAllowed {
+    @DeleteMapping(value = "/categories/{categorieId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteMethode405SandWithCatId() throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP DELETE n'est pas prévue pour cette route !");
     }
 
@@ -151,12 +141,13 @@ public class SandwichRepresentation {
 
     private Resource<Sandwich> sandwichToResource(Sandwich sandwich, Boolean collection) {
         Link selfLink = linkTo(SandwichRepresentation.class).slash(sandwich.getId()).withSelfRel();
-        Link CategLink = linkTo(CategorieRepresentation.class).slash(sandwich.getCategorie().getId()).withRel("categorie");
+        Link CategLink = linkTo(CategorieRepresentation.class).slash(sandwich.getCategorie().getId())
+                .withRel("categorie");
         if (collection) {
             Link collectionLink = linkTo(SandwichRepresentation.class).withRel("collection");
-            return new Resource<>(sandwich, selfLink, CategLink,collectionLink);
+            return new Resource<>(sandwich, selfLink, CategLink, collectionLink);
         } else {
-            return new Resource<>(sandwich, CategLink,selfLink);
+            return new Resource<>(sandwich, CategLink, selfLink);
         }
     }
 

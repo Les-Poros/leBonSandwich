@@ -1,7 +1,5 @@
 package org.lpro.commande.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 
 @Entity
@@ -12,12 +10,12 @@ public class Utilisateur {
     private String nom;
     private String mdp;
 
-
     Utilisateur() {
-
+        // necessaire pour JPA !
     }
+
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -25,7 +23,7 @@ public class Utilisateur {
     }
 
     public String getNom() {
-        return nom;
+        return this.nom;
     }
 
     public void setNom(String nom) {
@@ -33,8 +31,9 @@ public class Utilisateur {
     }
 
     public String getMdp() {
-        return mdp;
+        return this.mdp;
     }
+
     public void setMdp(String mdp) {
         this.mdp = mdp;
     }

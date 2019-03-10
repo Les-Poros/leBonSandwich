@@ -1,7 +1,5 @@
 package org.lpro.commande.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 
 @Entity
@@ -57,4 +55,5 @@ public class Sandwich {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }

@@ -1,7 +1,6 @@
 package org.lpro.commande.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 
 @Entity
@@ -16,21 +15,22 @@ public class Item {
 
     @ManyToOne
     @JsonIgnore
-    private Commande commande ;
+    private Commande commande;
 
     Item() {
-
+        // necessaire pour JPA !
     }
 
     public Commande getCommande() {
-        return commande;
+        return this.commande;
     }
 
     public void setCommande(Commande commande) {
         this.commande = commande;
     }
+
     public String getId() {
-        return id;
+        return this.id;
     }
 
     public void setId(String id) {
@@ -38,7 +38,7 @@ public class Item {
     }
 
     public String getUri() {
-        return uri;
+        return this.uri;
     }
 
     public void setUri(String uri) {
@@ -46,7 +46,7 @@ public class Item {
     }
 
     public String getLibelle() {
-        return libelle;
+        return this.libelle;
     }
 
     public void setLibelle(String libelle) {
@@ -54,7 +54,7 @@ public class Item {
     }
 
     public Integer getTarif() {
-        return tarif;
+        return this.tarif;
     }
 
     public void setTarif(Integer tarif) {
@@ -62,7 +62,7 @@ public class Item {
     }
 
     public Integer getQuantite() {
-        return quantite;
+        return this.quantite;
     }
 
     public void setQuantite(Integer quantite) {

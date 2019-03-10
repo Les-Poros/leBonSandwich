@@ -1,12 +1,9 @@
 package org.lpro.categoriesandwich.boundary;
 
 import java.util.*;
-
 import org.lpro.categoriesandwich.entity.Categorie;
-import org.lpro.categoriesandwich.exception.BadRequest;
 import org.lpro.categoriesandwich.exception.NotFound;
 import org.lpro.categoriesandwich.exception.MethodNotAllowed;
-
 import org.springframework.hateoas.ExposesResourceFor;
 import org.springframework.hateoas.Resource;
 import org.springframework.hateoas.Resources;
@@ -45,7 +42,7 @@ public class CategorieRepresentation {
     @GetMapping(value = "/{categorieId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getCategorieAvecId(@PathVariable("categorieId") String id) throws NotFound {
         return Optional.ofNullable(cr.findById(id)).filter(Optional::isPresent)
-                .map(categorie -> new ResponseEntity<>(categorieToResource(categorie.get(),false), HttpStatus.OK))
+                .map(categorie -> new ResponseEntity<>(categorieToResource(categorie.get(), false), HttpStatus.OK))
                 .orElseThrow(() -> new NotFound("Catégorie inexistante !"));
     }
 
@@ -60,8 +57,8 @@ public class CategorieRepresentation {
     }
 
     @PutMapping(value = "/{categorieId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putCategorie(@PathVariable("categorieId") String id, @RequestBody Categorie categorieUpdated)
-            throws NotFound {
+    public ResponseEntity<?> putCategorie(@PathVariable("categorieId") String id,
+            @RequestBody Categorie categorieUpdated) throws NotFound {
         return cr.findById(id).map(categorie -> {
             categorie.setDescription(categorieUpdated.getDescription());
             categorie.setNom(categorieUpdated.getNom());
@@ -78,28 +75,8 @@ public class CategorieRepresentation {
         }).orElseThrow(() -> new NotFound("Catégorie inexistante !"));
     }
 
-    @GetMapping(value = { "/", "/*", "/*/*", "/*/*/*", "/*/*/*/*" }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> getMethode400Cat() throws BadRequest {
-        throw new BadRequest("L'URI n'est pas connue de l'API !");
-    }
-
-    @PostMapping(value = { "/", "/*", "/*/*", "/*/*/*", "/*/*/*/*" }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> postMethode400Cat() throws BadRequest {
-        throw new BadRequest("L'URI n'est pas connue de l'API !");
-    }
-
-    @PutMapping(value = { "/", "/*", "/*/*", "/*/*/*", "/*/*/*/*" }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> putMethode400Cat() throws BadRequest {
-        throw new BadRequest("L'URI n'est pas connue de l'API !");
-    }
-
-    @DeleteMapping(value = { "/", "/*", "/*/*", "/*/*/*", "/*/*/*/*" }, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> deleteMethode400Cat() throws BadRequest {
-        throw new BadRequest("L'URI n'est pas connue de l'API !");
-    }
-
     @PostMapping(value = "/{categorieId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> postMethode405Cat(@PathVariable("categorieId") String id) throws MethodNotAllowed {
+    public ResponseEntity<?> postMethode405Cat() throws MethodNotAllowed {
         throw new MethodNotAllowed("La méthode HTTP POST n'est pas prévue pour cette route !");
     }
 
@@ -122,7 +99,8 @@ public class CategorieRepresentation {
 
     private Resource<Categorie> categorieToResource(Categorie categorie, Boolean collection) {
         Link selfLink = linkTo(CategorieRepresentation.class).slash(categorie.getId()).withSelfRel();
-        Link sandwichLink = linkTo(SandwichRepresentation.class).slash(linkTo(CategorieRepresentation.class)).slash(categorie.getId()).withRel("sandwichs");
+        Link sandwichLink = linkTo(SandwichRepresentation.class).slash(linkTo(CategorieRepresentation.class))
+                .slash(categorie.getId()).withRel("sandwichs");
         if (collection) {
             Link collectionLink = linkTo(CategorieRepresentation.class).withRel("collection");
             return new Resource<>(categorie, sandwichLink, selfLink, collectionLink);
